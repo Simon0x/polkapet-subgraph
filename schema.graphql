@@ -1,5 +1,12 @@
-type ExampleEntity @entity {
+type Pet @entity {
   id: ID!
-  count: BigInt!
-  account: Bytes! # address
+  holder: [PetHolder!]! @derivedFrom(field: "pet")
+  createdAt: BigInt!
+}
+
+type PetHolder @entity {
+  id: ID!
+  owner: Bytes!
+  pet: Pet!
+  quantity: BigInt!
 }
