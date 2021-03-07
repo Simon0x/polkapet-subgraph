@@ -1,6 +1,7 @@
 type Pet @entity {
   id: ID!
   holder: [PetHolder!]! @derivedFrom(field: "pet")
+  transfers: [PetTransfer!]! @derivedFrom(field: "pet")
   createdAt: BigInt!
 }
 
@@ -9,4 +10,15 @@ type PetHolder @entity {
   owner: Bytes!
   pet: Pet!
   quantity: BigInt!
+}
+
+type PetTransfer @entity {
+  id: ID!
+  from: Bytes!
+  to: Bytes!
+  pet: Pet!
+  txHash: Bytes!
+  blockTime: BigInt!
+  blockNumber: BigInt!
+  quanity: BigInt!
 }

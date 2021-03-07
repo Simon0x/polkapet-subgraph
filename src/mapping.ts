@@ -1,4 +1,4 @@
-import { BigInt, Address, store } from "@graphprotocol/graph-ts";
+import { BigInt, Address, store, ethereum } from "@graphprotocol/graph-ts";
 import {
   PolkaPet,
   WhitelistAdminAdded,
@@ -11,7 +11,7 @@ import {
   TransferBatch,
   ApprovalForAll,
 } from "../generated/PolkaPet/PolkaPet";
-import { Pet, PetHolder } from "../generated/schema";
+import { Pet, PetHolder, PetTransfer } from "../generated/schema";
 import { BIGINT_ZERO, ZERO_ADDRESS } from "./constants";
 
 export function handleWhitelistAdminAdded(event: WhitelistAdminAdded): void {}
@@ -34,7 +34,7 @@ export function handleTransferSingle(event: TransferSingle): void {
     event.params._to,
     event.params._id,
     event.params._amount,
-    event.block.timestamp
+    event
   );
 }
 
@@ -51,7 +51,7 @@ export function handleTransferBatch(event: TransferBatch): void {
       event.params._to,
       ids[i],
       values[i],
-      event.block.timestamp
+      event
     );
   }
 }
@@ -65,13 +65,13 @@ export function transferBase(
   to: Address,
   id: BigInt,
   amount: BigInt,
-  timestamp: BigInt
+  event: ethereum.Event
 ): void {
   let petId = id.toString();
   let pet = Pet.load(petId);
   if (pet == null) {
     pet = new Pet(petId);
-    pet.createdAt = timestamp;
+    pet.createdAt = event.block.timestamp;
     pet.save();
   }
 
@@ -79,6 +79,21 @@ export function transferBase(
     updatePetHolder(petId, from, BIGINT_ZERO.minus(amount));
   }
   updatePetHolder(petId, to, amount);
+
+  let transferId =
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString();
+  let petTransfer = PetTransfer.load(transferId);
+  if (petTransfer == null) {
+    petTransfer = new PetTransfer(transferId);
+    petTransfer.blockNumber = event.block.number;
+    petTransfer.blockTime = event.block.timestamp;
+    petTransfer.from = from;
+    petTransfer.to = to;
+    petTransfer.quanity = amount;
+    petTransfer.txHash = event.transaction.hash;
+    petTransfer.pet = petId;
+    petTransfer.save();
+  }
 }
 
 export function updatePetHolder(
