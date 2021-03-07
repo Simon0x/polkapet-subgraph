@@ -20,5 +20,5 @@ type PetTransfer @entity {
   txHash: Bytes!
   blockTime: BigInt!
   blockNumber: BigInt!
-  quanity: BigInt!
+  quantity: BigInt!
 }

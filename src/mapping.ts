@@ -89,7 +89,7 @@ export function transferBase(
     petTransfer.blockTime = event.block.timestamp;
     petTransfer.from = from;
     petTransfer.to = to;
-    petTransfer.quanity = amount;
+    petTransfer.quantity = amount;
     petTransfer.txHash = event.transaction.hash;
     petTransfer.pet = petId;
     petTransfer.save();
